@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from typing import Callable, List, Optional, Tuple, Union
-from animation import Animation, CanvasRenderer, create_render_thunk
+from animation_framework import Animation, CanvasRenderer, create_render_thunk
 
 def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
     root = Tk()
@@ -9,10 +9,8 @@ def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
     canvas = Canvas(root, bg="white", height=450, width=800)
     canvas.pack(side=LEFT)
 
-    # If the rederer is implemented correctly, render_fireworks is an
-    # impotent function with no arguements.
     rederer = CanvasRenderer(canvas)
-    render_fireworks = create_render_thunk(rederer, animations)
+
 
     button_frame = ttk.Frame(root, padding=10)
     button_frame.pack(side=RIGHT, fill=Y)
@@ -22,11 +20,12 @@ def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
         text="Run Your Animation!"
     ).pack(side=TOP)
 
-    ttk.Button(
-        button_frame, 
-        text="Go", 
-        command=render_fireworks
-    ).pack(side=TOP)
+    for a in animations:
+        ttk.Button(
+            button_frame, 
+            text=a.name, 
+            command=create_render_thunk(rederer, a)
+        ).pack(side=TOP)
 
     ttk.Button(
         button_frame, 
