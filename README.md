@@ -6,7 +6,7 @@ Written with python3.10.1
 
 ### If your OS Maintains compatibility with the Ubuntu repositories
 
-With this README is in your terminal's current working directory (CWD), the following commands should set up and run this project
+With this README in in your terminal's current working directory (CWD), the following commands should set up and run this project
 
 - `sudo apt update && sudo apt upgrade -y`
 - `sudo add-apt-repository ppa:deadsnakes/ppa`
