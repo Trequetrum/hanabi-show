@@ -24,10 +24,10 @@ class CirleMove(Animation):
         if(time > 0 and time < self.duration):
 
             when = time/self.duration
-            current = (
-                ratiod(self.start[0], self.end[0], when),
-                ratiod(self.start[1], self.end[1], when)
-            )
+            current = {
+                'x': ratiod(self.start[0], self.end[0], when),
+                'y': ratiod(self.start[1], self.end[1], when)
+            }
 
             return [Circle(
                 color=self.color,
@@ -62,11 +62,14 @@ class CircleTravelAlongAFunction(Animation):
 
             when = time/self.duration
             x = ratiod(self.start_x, self.end_x, when)
-            y = self.y_at(x)
+            current = {
+                'x': x,
+                'y': self.y_at(x)
+            }
 
             return [Circle(
                 color=self.color,
-                pos=(x,y), 
+                pos=current, 
                 radius=self.radius
             )]
         

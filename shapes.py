@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, TypedDict
 
 from utility import clamp_int
 
@@ -27,6 +27,11 @@ class ColorNames():
     TEAL = Color(0,128,128)
     NAVY = Color(0,0,128)	
 
+
+class Point(TypedDict):
+    x: int
+    y: int
+
 class Shape():
 
     __safe_id: int = 1
@@ -39,7 +44,7 @@ class Shape():
     def __init__(self, 
         fill: bool = True, 
         color: Color = ColorNames.BLACK,
-        pos: Tuple[int, int] = (0,0)
+        pos: Point = { 'x':0, 'y':0 }
     ):
         self.id = Shape.__gen_id()
         self.fill = fill

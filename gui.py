@@ -11,27 +11,25 @@ def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
 
     rederer = CanvasRenderer(canvas)
 
-
-    button_frame = ttk.Frame(root, padding=10)
-    button_frame.pack(side=RIGHT, fill=Y)
-
-    ttk.Label(
-        button_frame, 
+    button_frame = ttk.LabelFrame(
+        root,
+        padding=10,
         text="Run Your Animation!"
-    ).pack(side=TOP)
+    )
+    button_frame.pack(side=RIGHT, fill=Y, pady=(5,0))
 
     for a in animations:
         ttk.Button(
             button_frame, 
             text=a.name, 
             command=create_render_thunk(rederer, a)
-        ).pack(side=TOP)
+        ).pack(side=TOP, fill=X)
 
     ttk.Button(
         button_frame, 
         text="Quit", 
         command=root.destroy
-    ).pack(side=TOP)
+    ).pack(side=BOTTOM, fill=X)
 
     root.mainloop()
     

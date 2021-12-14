@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from typing import Callable, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple, TypedDict
 from shapes import Shape, Circle, Color
 import rx
 from rx import operators as ops
@@ -36,41 +36,92 @@ class Scene(Animation):
 
 class Renderer():
 
-    def draw_shapes(self, shape: List[Shape]) -> None:
+    def update_animation_layer(self, layer: str, shapes: List[Shape]) -> None:
+        raise NotImplementedError
+    def clear_animation_layer(self, layer: str) -> None:
+        raise NotImplementedError
+
+    def draw_shapes(self, shapes: List[Shape]) -> None:
         raise NotImplementedError
     def clear_shapes(self) -> None:
         raise NotImplementedError
 
-
+class ConvasSceneToken(TypedDict):
+    id: int
+    dirty: bool
+    
 class CanvasRenderer(Renderer):
-
-    canvas: Canvas
 
     @staticmethod
     def color_str(c: Color):
         return f'#{c.red:02X}{c.green:02X}{c.blue:02X}'
 
-    def __init__(self, canvas: Canvas):
+    def __init__(self, canvas: Canvas) -> None:
         self.canvas = canvas
+        self.layers: Dict[str, Dict[int, ConvasSceneToken]] = dict()
 
-    def draw_shape(self, shape: Shape) -> None:
-        if(isinstance(shape, Circle)):
-            color = CanvasRenderer.color_str(shape.color)
+    def create_default_shape(self, shape: Shape) -> int:
+        if isinstance(shape, Circle):
+            return self.canvas.create_oval(0,0,0,0)
 
-            coords = [
-                shape.pos[0] - shape.radius,
-                shape.pos[1] - shape.radius,
-                shape.pos[0] + shape.radius,
-                shape.pos[1] + shape.radius
-            ]
+        raise NotImplementedError
 
-            self.canvas.create_oval(*coords, fill=color if shape.fill else '')
-    
-    def draw_shapes(self, shapes: List[Shape]) -> None:
-        for s in shapes:
-            self.draw_shape(s)
+    def update_shape(self, item_dict: Dict[int, ConvasSceneToken], shape: Shape) -> None:
+        update_item_config: Any = dict()
+        update_item_coords: List[int] = []
 
-    def clear_shapes(self) -> None:
+        color = CanvasRenderer.color_str(shape.color)
+        update_item_config['fill'] = color if shape.fill else ''
+
+        canvas_item = item_dict[shape.id]
+        
+        if isinstance(shape, Circle):
+            update_item_coords = [
+                shape.pos['x'] - shape.radius,
+                shape.pos['y'] - shape.radius,
+                shape.pos['x'] + shape.radius,
+                shape.pos['y'] + shape.radius
+            ]  
+        else:
+            raise NotImplementedError
+
+        self.canvas.coords(canvas_item['id'], *update_item_coords)
+        self.canvas.itemconfigure(canvas_item['id'], **update_item_config)
+
+
+    # self.canvas.itemconfigure(tagOrId, option, ...)
+    # self.canvas.move(tagOrId, xAmount, yAmount)
+    def update_animation_layer(self, layer: str, shapes: List[Shape]) -> None:
+        if not layer in self.layers:
+            self.layers[layer] = dict()
+        
+        item_dict = self.layers[layer]
+
+        for shape in shapes:
+            if not shape.id in item_dict:
+                new_id = self.create_default_shape(shape)
+                self.canvas.itemconfigure(new_id, tags=layer)
+                item_dict[shape.id] = {
+                    'id': new_id,
+                    'dirty': False
+                }
+
+        for shape in shapes:
+            # assert shape.id in item_dict
+            item_dict[shape.id]['dirty'] = True
+            self.update_shape(item_dict, shape)
+        
+        for (id, token) in list(item_dict.items()):
+            if token['dirty'] == False:
+                del item_dict[id]
+                self.canvas.delete(id)
+            else:
+                item_dict[id]['dirty'] = False
+
+    def clear_animation_layer(self, layer: str) -> None:
+        self.canvas.delete(layer)
+
+    def clear_everything(self) -> None:
         self.canvas.delete(ALL)
 
 
@@ -78,6 +129,12 @@ def flatten_to_shapes(time: int, fireworks: List[Animation]) -> List[Shape]:
     t = map(lambda v: v.get_state(time), fireworks)
     return [item for sublist in t for item in sublist]
 
+
+count = 0
+def gen_layer_name(prefix):
+    global count
+    count += 1
+    return f"{prefix}_{count}"
 
 def create_render_thunk(
     r: Renderer, 
@@ -88,19 +145,19 @@ def create_render_thunk(
     refresh_rate_s = refresh_rate * 0.001 # seconds
     duration_s = animation.duration * 0.001 # seconds
 
-    def effect() -> None:
+    def thunk_effect() -> None:
         
+        layer_name = gen_layer_name(animation.name)
+
         rx.interval(refresh_rate_s).pipe(
             ops.take(round(duration_s/refresh_rate_s)),
             ops.map(lambda v: v * refresh_rate),
             ops.map(lambda time: animation.get_state(time)),
-            ops.do_action(
-                on_next=lambda _: r.clear_shapes(), 
-                on_completed=lambda: r.clear_shapes()
-            ),
-            ops.do_action(
-                on_completed=lambda: print("COMPLETE")
+            ops.do_action( 
+                on_completed=lambda: r.update_animation_layer(layer_name, [])
             )
-        ).subscribe(r.draw_shapes)
+        ).subscribe(
+            lambda shapes: r.update_animation_layer(layer_name, shapes)
+        )
     
-    return effect
+    return thunk_effect
