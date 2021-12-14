@@ -1,7 +1,6 @@
 from typing import Callable, List, Optional, Tuple, Union
-from animation_framework import Animation, Scene
 from shapes import ColorNames
-from animations import CircleTravelAlongAFunction, CirleMove
+from animations import Animation, Scene, CircleTravelAlongAFunction, CirleMove
 import gui
 
 def main() -> None:

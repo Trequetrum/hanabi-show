@@ -4,6 +4,12 @@ from typing import Callable, List, Optional, Tuple, Union
 from animation_framework import Animation, CanvasRenderer, create_render_thunk
 
 def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
+    """ Mega-simple GUI: 
+    
+    Lets you run a list of animations.
+    The name of each animation is used as a lable for a button
+    that runs the animation in a tkinter canvas.
+    """
     root = Tk()
 
     canvas = Canvas(root, bg="white", height=450, width=800)

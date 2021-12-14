@@ -1,59 +1,44 @@
 from tkinter import *
 from tkinter import ttk
 from typing import Any, Callable, Dict, List, Tuple, TypedDict
-from shapes import Shape, Circle, Color
 import rx
 from rx import operators as ops
+from shapes import Shape, Circle, Color
+from animations import Animation
 
-class Animation():
-
-    def __init__(self, duration: int, name: str = ''):
-        self.duration = duration
-        self.name = name
-
-    def get_state(self, time:int) -> List[Shape]:
-        raise NotImplementedError
-
-
-class Scene(Animation):
-
-    def __init__(self, animations: List[Tuple[int, Animation]], name: str = ''):
-        self.animations = animations
-        super().__init__(
-            name=name,
-            duration=max(
-                map(lambda v: v[0] + v[1].duration, animations)
-            )
-        )
-
-    def get_state(self, time:int) -> List[Shape]:
-        shapes = []
-        for (start_time, a) in self.animations:
-            if(time >= start_time and time <= start_time + a.duration):
-                shapes += a.get_state(time - start_time)
-        
-        return shapes
 
 class Renderer():
+    """Abstract Class
 
+    Renderer contain all the details about the specifics of rendering
+    to a given API. It's a wrapper class. By implementing this you 
+    can render using HTML, tkinter canvas, or kinter turtle without
+    needing to implement anything else. 
+    """
     def update_animation_layer(self, layer: str, shapes: List[Shape]) -> None:
         raise NotImplementedError
     def clear_animation_layer(self, layer: str) -> None:
         raise NotImplementedError
+    def clear_everything(self) -> None:
+        raise NotImplementedError
 
-    def draw_shapes(self, shapes: List[Shape]) -> None:
-        raise NotImplementedError
-    def clear_shapes(self) -> None:
-        raise NotImplementedError
 
 class ConvasSceneToken(TypedDict):
+    "A helper class for CanvasRenderer"
     id: int
     dirty: bool
-    
+
+
 class CanvasRenderer(Renderer):
+    """A Canvas Renderer Implementation
+
+    This is a partial implementation as it currently only renders
+    circles. Good enough to test out.
+    """
 
     @staticmethod
     def color_str(c: Color):
+        "Outputs a string in the format that tk canvas expects"
         return f'#{c.red:02X}{c.green:02X}{c.blue:02X}'
 
     def __init__(self, canvas: Canvas) -> None:
@@ -61,12 +46,25 @@ class CanvasRenderer(Renderer):
         self.layers: Dict[str, Dict[int, ConvasSceneToken]] = dict()
 
     def create_default_shape(self, shape: Shape) -> int:
+        """ Canvas tracks items by ID but also by what type of thing
+        they are. We use this to tell canvas what type of thing is
+        attached to each ID, then we never worry about that again,
+        we can safely update afterward.
+        """
         if isinstance(shape, Circle):
             return self.canvas.create_oval(0,0,0,0)
 
         raise NotImplementedError
 
     def update_shape(self, item_dict: Dict[int, ConvasSceneToken], shape: Shape) -> None:
+        """Updating shapes
+        Most drawn shapes on the canvas are described by some set of
+        coordinates (how many depends on the type of thing) and an
+        optional dictionary of options.
+
+        Here we set update_item_config and update_item_coords 
+        depending on what is being updated.
+        """
         update_item_config: Any = dict()
         update_item_coords: List[int] = []
 
@@ -89,8 +87,6 @@ class CanvasRenderer(Renderer):
         self.canvas.itemconfigure(canvas_item['id'], **update_item_config)
 
 
-    # self.canvas.itemconfigure(tagOrId, option, ...)
-    # self.canvas.move(tagOrId, xAmount, yAmount)
     def update_animation_layer(self, layer: str, shapes: List[Shape]) -> None:
         if not layer in self.layers:
             self.layers[layer] = dict()
@@ -132,6 +128,8 @@ def flatten_to_shapes(time: int, fireworks: List[Animation]) -> List[Shape]:
 
 count = 0
 def gen_layer_name(prefix):
+    "TODO: Fix this. This is a hack to get unique names."
+
     global count
     count += 1
     return f"{prefix}_{count}"
@@ -141,6 +139,12 @@ def create_render_thunk(
     animation: Animation,
     refresh_rate: int = 50 # milliseconds
 ) -> Callable[[], None]:
+    """Run an animation
+    
+    This funtion returns a thunk that runs the given animation in the 
+    given rederer. That makes it easy to instrament this thunk to be
+    run by various UIs
+    """
 
     refresh_rate_s = refresh_rate * 0.001 # seconds
     duration_s = animation.duration * 0.001 # seconds
