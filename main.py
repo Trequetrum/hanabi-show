@@ -12,7 +12,7 @@ def main() -> None:
         y_at=lambda x: round((x * -0.5) + 400),
         duration=3000,
         radius=15,
-        color=ColorNames.YELLOW
+        color=ColorNames.YELLOW()
     )
     
     peaks: List[Animation] = [
@@ -30,7 +30,7 @@ def main() -> None:
             y_at=lambda x: round(x * 0.5 - 150),
             duration=2000,
             radius=5,
-            color=ColorNames.CYAN
+            color=ColorNames.CYAN()
         ),
         # Probably easier to just give a start and end location
         CirleMove(
@@ -38,35 +38,35 @@ def main() -> None:
             end=(550, 50),
             duration=2000,
             radius=6,
-            color=ColorNames.LIME
+            color=ColorNames.LIME()
         ),
         CirleMove(
             start=(550, 125),
             end=(450, 200),
             duration=2100,
             radius=7,
-            color=ColorNames.NAVY
+            color=ColorNames.NAVY()
         ),
         CirleMove(
             start=(550, 125),
             end=(650, 250),
             duration=2200,
             radius=8,
-            color=ColorNames.GREEN
+            color=ColorNames.GREEN()
         ),
         CirleMove(
             start=(550, 125),
             end=(500, 400),
             duration=3000,
             radius=9,
-            color=ColorNames.PURPLE
+            color=ColorNames.PURPLE()
         ),
         CirleMove(
             start=(550, 125),
             end=(650, 10),
             duration=2300,
             radius=8,
-            color=ColorNames.SILVER
+            color=ColorNames.SILVER()
         )
     ]
 

@@ -1,7 +1,7 @@
-from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, Tk, Canvas, TOP, BOTTOM, LEFT, RIGHT, Y, X
 from typing import Callable, List, Optional, Tuple, Union
-from animation_framework import Animation, CanvasRenderer, create_render_thunk
+from animations import Animation
+from rendering import CanvasRenderer, RenderThunk
 
 def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
     """ Mega-simple GUI: 
@@ -28,7 +28,7 @@ def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
         ttk.Button(
             button_frame, 
             text=a.name, 
-            command=create_render_thunk(rederer, a)
+            command=RenderThunk(rederer, a).render
         ).pack(side=TOP, fill=X)
 
     ttk.Button(

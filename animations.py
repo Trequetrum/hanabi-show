@@ -1,5 +1,5 @@
 from typing import Callable, List, Optional, Tuple, Union
-from shapes import Shape, Circle, Color
+from shapes import ColorNames, Point, Shape, Circle, Color
 from utility import ratiod
 
  
@@ -30,7 +30,9 @@ class Scene(Animation):
     """Combining animations
 
     Scene takes a list of animations. Each animation must be included 
-    in a tuple that describes when that animation starts.
+    in a tuple that describes when that animation starts. Since Scenes
+    can be aribrarily nested, this lets you build complex animations 
+    from more primitive ones.
     """
 
     def __init__(self, animations: List[Tuple[int, Animation]], name: str = ''):
@@ -67,8 +69,14 @@ class CirleMove(Animation):
     ):
         self.start = start
         self.end = end
-        self.radius = radius
-        self.color = color
+
+        self.init_circle = Circle(
+            position=Point(0, 0),
+            fill_color=color,
+            line_color=ColorNames.YELLOW(),
+            line_width=2, 
+            radius=radius
+        )
 
         super().__init__(*args, **kwargs)
 
@@ -76,16 +84,13 @@ class CirleMove(Animation):
         if(time > 0 and time < self.duration):
 
             when = time/self.duration
-            current = {
-                'x': ratiod(self.start[0], self.end[0], when),
-                'y': ratiod(self.start[1], self.end[1], when)
-            }
 
-            return [Circle(
-                color=self.color,
-                pos=current, 
-                radius=self.radius
-            )]
+            self.init_circle.position = Point(
+                x=ratiod(self.start[0], self.end[0], when),
+                y=ratiod(self.start[1], self.end[1], when)
+            )
+
+            return [self.init_circle]
         
         return []
 
@@ -108,8 +113,12 @@ class CircleTravelAlongAFunction(Animation):
         self.start_x = start_x
         self.end_x = end_x
         self.y_at = y_at
-        self.radius = radius
-        self.color = color
+
+        self.init_circle = Circle(
+            position=Point(0,0),
+            fill_color=color,
+            radius=radius
+        )
 
         super().__init__(*args, **kwargs)
 
@@ -119,15 +128,11 @@ class CircleTravelAlongAFunction(Animation):
 
             when = time/self.duration
             x = ratiod(self.start_x, self.end_x, when)
-            current = {
-                'x': x,
-                'y': self.y_at(x)
-            }
+            self.init_circle.position = Point(
+                x=x,
+                y=self.y_at(x)
+            )
 
-            return [Circle(
-                color=self.color,
-                pos=current, 
-                radius=self.radius
-            )]
+            return [self.init_circle]
         
         return []
