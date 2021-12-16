@@ -125,18 +125,21 @@ class Picture():
         raise NotImplementedError
 
 class PurePicture(Picture):
-    "A single shape is a list of shapes"
+    """A single shape can be a picture and its properties already
+    describe itself fully. Rather than subclassing, PurePicture
+    just acts as a proxy to an actual shape.
+    """
     def __init__(self, shape: Shape) -> None:
-        self._shape = shape
+        self._internal_proxy_shape = shape
 
     def __getattr__(self, name):
-        return getattr(self._shape, name)
+        return getattr(self._internal_proxy_shape, name)
     
     def __setattr__(self, name, value):
-        if(name == "_shape"):
+        if(name == "_internal_proxy_shape"):
             super().__setattr__(name, value)
         else:
-            setattr(self._shape, name, value)
+            setattr(self._internal_proxy_shape, name, value)
 
     def get_shapes(self) -> List[Shape]:
-        return [self._shape]
+        return [self._internal_proxy_shape]

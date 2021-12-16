@@ -1,5 +1,5 @@
 from random import randint
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, List
 from shapes import Circle, ColorNames, Point, PurePicture
 from animation import Animation, Scene, CircleTravelAlongAFunction, CirleMove
 from animation_builder import AnimationBuilder, animate_color, animate_int, animate_point
@@ -20,18 +20,17 @@ def firework_via_builder() -> Animation:
             line_width=1,
             position=start_pos(),
             radius=15
-        )), 
+        )),
+        animators=[
+            animate_color('fill_color', ColorNames.random(), 1000),
+            animate_color('fill_color', ColorNames.random(), 1000, 1000),
+            animate_color('fill_color', ColorNames.random(), 1000, 2000),
+            animate_color('fill_color', ColorNames.random(), 1000, 3000),
+            animate_int('radius', 3, 4000),
+            animate_point('position', end_pos(), 4000)
+        ],
         duration=4000, 
         name="Trunk"
-    )
-
-    trunk.add_animators(
-        animate_color('fill_color', ColorNames.random(), 1000),
-        animate_color('fill_color', ColorNames.random(), 1000, 1000),
-        animate_color('fill_color', ColorNames.random(), 1000, 2000),
-        animate_color('fill_color', ColorNames.random(), 1000, 3000),
-        animate_int('radius', 3, 4000),
-        animate_point('position', end_pos(), 4000)
     )
 
     peaks: Any = [

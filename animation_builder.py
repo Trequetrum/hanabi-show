@@ -9,19 +9,21 @@ class AnimationBuilder(Animation):
     def __init__(self, 
         subject: Picture,
         duration: int,
+        animators: List[Callable[[Picture], Callable[[int], None]]] = [],
         *args, **kwargs
     ):
         self._subject = subject
-        self._setters: List[Callable[[int], None]] = []
+        self._animators: List[Callable[[int], None]] = []
+        self.add_animators(*animators)
         super().__init__(duration, *args, **kwargs)
 
     def add_animators(self, *setters: Callable[[Picture], Callable[[int], None]]) -> None:
-        self._setters += list(map(lambda f: f(self._subject), setters))
-
+        self._animators += [f(self._subject) for f in setters]
+        
     def get_state(self, time:int) -> List[Shape]:
         if(time > 0 and time < self.duration):
 
-            for setter in self._setters:
+            for setter in self._animators:
                 setter(time)
             return self._subject.get_shapes()
         
@@ -72,3 +74,4 @@ def color_setter_linear(color: Color, start: Color, target: Color, time: int, du
 
 def animate_color(prop: str, target: Color, duration: int, start:int = 0):
     return animate_property(prop, target, duration, start, color_setter_linear)
+
