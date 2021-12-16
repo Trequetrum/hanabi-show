@@ -1,3 +1,4 @@
+import random as rand
 from typing import Any, Callable, List, Tuple, TypedDict
 from dataclasses import dataclass, field
 
@@ -34,7 +35,15 @@ class ColorNames():
     GREEN = lambda: Color(0,128,0)
     PURPLE = lambda: Color(128,0,128)
     TEAL = lambda: Color(0,128,128)
-    NAVY = lambda: Color(0,0,128)	
+    NAVY = lambda: Color(0,0,128)
+
+    @staticmethod
+    def random():
+        return Color(
+            rand.randint(0,255),
+            rand.randint(0,255),
+            rand.randint(0,255)
+        )
 
 @dataclass
 class Point():
@@ -109,3 +118,25 @@ class Arc(PrimitiveShape, BoxCoords):
     start: int = 0 # Degrees
     extent: int = 360 # Degrees
     style: int = STYLE_PIESLICE
+
+class Picture():
+    """A picture generates a list of shapes"""
+    def get_shapes(self) -> List[Shape]:
+        raise NotImplementedError
+
+class PurePicture(Picture):
+    "A single shape is a list of shapes"
+    def __init__(self, shape: Shape) -> None:
+        self._shape = shape
+
+    def __getattr__(self, name):
+        return getattr(self._shape, name)
+    
+    def __setattr__(self, name, value):
+        if(name == "_shape"):
+            super().__setattr__(name, value)
+        else:
+            setattr(self._shape, name, value)
+
+    def get_shapes(self) -> List[Shape]:
+        return [self._shape]

@@ -1,8 +1,7 @@
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Tuple
 from shapes import ColorNames, Point, Shape, Circle, Color
 from utility import ratiod
 
- 
 
 class Animation():
     """Describes an animation
@@ -36,7 +35,7 @@ class Scene(Animation):
     """
 
     def __init__(self, animations: List[Tuple[int, Animation]], name: str = ''):
-        self.animations = animations
+        self._animations = animations
         super().__init__(
             name=name,
             duration=max(
@@ -46,7 +45,7 @@ class Scene(Animation):
 
     def get_state(self, time:int) -> List[Shape]:
         shapes = []
-        for (start_time, a) in self.animations:
+        for (start_time, a) in self._animations:
             if(time >= start_time and time <= start_time + a.duration):
                 shapes += a.get_state(time - start_time)
         
@@ -60,17 +59,17 @@ class CirleMove(Animation):
     """
 
     def __init__(self, 
-        start: Tuple[int, int],
-        end: Tuple[int, int],
+        start: Point,
+        end: Point,
         radius: int,
         color: Color,
         *args, 
         **kwargs
     ):
-        self.start = start
-        self.end = end
+        self._start = start
+        self._end = end
 
-        self.init_circle = Circle(
+        self._init_circle = Circle(
             position=Point(0, 0),
             fill_color=color,
             line_color=ColorNames.YELLOW(),
@@ -85,12 +84,12 @@ class CirleMove(Animation):
 
             when = time/self.duration
 
-            self.init_circle.position = Point(
-                x=ratiod(self.start[0], self.end[0], when),
-                y=ratiod(self.start[1], self.end[1], when)
+            self._init_circle.position = Point(
+                x=ratiod(self._start.x, self._end.x, when),
+                y=ratiod(self._start.y, self._end.y, when)
             )
 
-            return [self.init_circle]
+            return [self._init_circle]
         
         return []
 
@@ -107,14 +106,13 @@ class CircleTravelAlongAFunction(Animation):
         y_at: Callable[[int], int],
         radius: int,
         color: Color,
-        *args, 
-        **kwargs
+        *args, **kwargs
     ):
-        self.start_x = start_x
-        self.end_x = end_x
-        self.y_at = y_at
+        self._start_x = start_x
+        self._end_x = end_x
+        self._y_at = y_at
 
-        self.init_circle = Circle(
+        self._init_circle = Circle(
             position=Point(0,0),
             fill_color=color,
             radius=radius
@@ -127,12 +125,12 @@ class CircleTravelAlongAFunction(Animation):
         if(time > 0 and time < self.duration):
 
             when = time/self.duration
-            x = ratiod(self.start_x, self.end_x, when)
-            self.init_circle.position = Point(
+            x = ratiod(self._start_x, self._end_x, when)
+            self._init_circle.position = Point(
                 x=x,
-                y=self.y_at(x)
+                y=self._y_at(x)
             )
 
-            return [self.init_circle]
+            return [self._init_circle]
         
         return []

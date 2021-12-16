@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Tuple, TypedDict
 import rx
 from rx import operators as ops
 from shapes import Arc, BoxCoords, Line, Oval, Polygon, PrimitiveShape, Rectangle, Shape, Circle, Color, Text
-from animations import Animation
+from animation import Animation
 from utility import gen_unique_number
 
 class Renderer():
@@ -179,7 +179,7 @@ class CanvasRenderer(Renderer):
 
 
     def clear_animation_layer(self, layer: str) -> None:
-        self.canvas.delete((layer))
+        self.canvas.delete(layer)
 
 
     def clear_everything(self) -> None:

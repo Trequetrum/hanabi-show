@@ -8,6 +8,7 @@ def gen_unique_number() -> int:
     return _count
 
 def ratiod(start: int, end: int, ratio:float) -> int:
+    "There's undoubtedly a better name for this :/"
     return round(((end - start) * ratio) + start)
 
 def clamp_int(v:int, min_v:int, max_v:int) -> int:

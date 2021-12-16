@@ -1,6 +1,6 @@
 from tkinter import ttk, Tk, Canvas, TOP, BOTTOM, LEFT, RIGHT, Y, X
 from typing import Callable, List, Optional, Tuple, Union
-from animations import Animation
+from animation import Animation
 from rendering import CanvasRenderer, RenderThunk
 
 def tkcanvas_animiation_gui(animations: List[Animation]) -> None:
