@@ -53,7 +53,7 @@ def animate_property(
             nonlocal init
             local_time = time - start_time
             if local_time > 0:
-                if init is None: init = copy.copy(getattr(src, prop))
+                if init is None: init = copy.deepcopy(getattr(src, prop))
                 newval = setter(prop_val, init, local_time, **kwargs)
                 if not (newval is None): setattr(src, prop, newval)
         return curry_time
@@ -86,6 +86,11 @@ def _color_setter_linear(property: Color, initial: Color, time: int, *, target: 
     property.green = clamp_int(ratiod(initial.green, target.green, when), 0 ,255)
     property.blue = clamp_int(ratiod(initial.blue, target.blue, when), 0 ,255)
 
+def _vertices_setter_linear(property: List[Point], initial: List[Point], time: int, *, target: List[Point], duration: int) -> None:
+    "UpdaterFunction for a list of points"
+    for p, i, t in zip(property, initial, target):
+        _point_setter_linear(p, i, time, target=t, duration=duration)
+
 # animate_property is a bit unweildy from an API perspective. It gives
 # you almost too much flexibility. So here we define a public api for
 # some ways to animate certain types of properties. These just defer
@@ -99,3 +104,6 @@ def animate_point(prop: str, target: Point, duration: int, start:int = 0):
 
 def animate_color(prop: str, target: Color, duration: int, start:int = 0):
     return animate_property(prop, start, _color_setter_linear, target=target, duration=duration)
+
+def animate_vertices(prop: str, target: List[Point], duration: int, start:int = 0):
+    return animate_property(prop, start, _vertices_setter_linear, target=target, duration=duration)
