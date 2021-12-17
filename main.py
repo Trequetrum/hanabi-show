@@ -16,6 +16,5 @@ def main() -> None:
 
     gui.tkcanvas_animiation_gui([a, *b, together, staggered])
 
-
 if __name__ == "__main__":
-    pass# main()
+    main()
