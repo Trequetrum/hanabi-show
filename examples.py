@@ -8,6 +8,9 @@ from utility import gen_unique_number
 def firework_via_builder() -> Animation:
     random_start = Point(randint(50, 750), randint(400, 450))
     random_end = Point(randint(50, 750), randint(50, 150))
+    random_trunk_length = randint(3000,4000)
+
+    quarter_trunk = round(random_trunk_length/4)
 
     start_pos = lambda: Point(random_start.x, random_start.y)
     end_pos = lambda: Point(random_end.x, random_end.y)
@@ -21,9 +24,9 @@ def firework_via_builder() -> Animation:
             radius=15
         )),
         animators= [
-            *[animate_color('fill_color', Color.random(), 1000, x * 1000) for x in range(4)],
-            animate_int('radius', 3, 4000),
-            animate_point('position', end_pos(), 4000)
+            *[animate_color('fill_color', Color.random(), 1000, x * quarter_trunk) for x in range(4)],
+            animate_int('radius', 3, random_trunk_length),
+            animate_point('position', end_pos(), random_trunk_length)
         ],
         duration=4000, 
         name="Trunk"
@@ -59,7 +62,7 @@ def firework_via_builder() -> Animation:
         name=f"Builder Firework {gen_unique_number()}", 
         animations=[
             (0, trunk), 
-            *[(4000, peak) for peak in peaks]
+            *[(random_trunk_length, peak) for peak in peaks]
         ]
     )
 

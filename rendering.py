@@ -186,6 +186,8 @@ class CanvasRenderer(Renderer):
                 self.canvas.delete(token['id'])
             else:
                 item_dict[id]['dirty'] = False
+        
+        self.canvas.update()
 
 
     def clear_animation_layer(self, layer: str) -> None:
@@ -220,9 +222,7 @@ class RenderThunk():
         layer_name = f"""{self.animation.name}_{gen_unique_number()}
             """.translate({ord(c):None for c in ' \n\t\r'})
 
-
         rx.interval(self._refresh_rate_s).pipe(
-            ops.take_until_with_time(self._duration_s),
             ops.take(round(self._duration_s/self._refresh_rate_s + 0.5)),
             ops.map(lambda v: v * self.refresh_rate),
             ops.map(lambda time: self.animation.get_state(time)),
