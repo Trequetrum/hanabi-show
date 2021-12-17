@@ -1,14 +1,15 @@
 import tkinter.font as tkfont
 import tkinter as tk
-from tkinter import ttk, Canvas, ALL
-from typing import Any, Callable, Dict, List, Tuple, TypedDict
+from tkinter import Canvas, ALL
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, TypedDict
 import rx
 from rx import operators as ops
 from shapes import Arc, BoxCoords, Line, Oval, Polygon, PrimitiveShape, Rectangle, Shape, Circle, Color, Text
 from animation import Animation
-from utility import gen_unique_number
+from utility import clamp_int, gen_unique_number
 
-class Renderer():
+class Renderer(ABC):
     """Abstract Class
 
     Renderer contains all the details regarding rendering to a given 
@@ -16,12 +17,15 @@ class Renderer():
     using HTML, tkinter canvas, kinter turtle, or even microsft paint
     (as examples) without needing to implement anything else.
     """
+    @abstractmethod
     def update_animation_layer(self, layer: str, shapes: List[Shape]) -> None:
-        raise NotImplementedError
+        pass
+    @abstractmethod
     def clear_animation_layer(self, layer: str) -> None:
-        raise NotImplementedError
+        pass
+    @abstractmethod
     def clear_everything(self) -> None:
-        raise NotImplementedError
+        pass
 
 
 class ConvasSceneToken(TypedDict):
@@ -96,10 +100,16 @@ class CanvasRenderer(Renderer):
             font_config['overstrike'] = 1 if shape.font_underline else 0
             update_item_config['font'] = tkfont.Font(**font_config)
 
+        if isinstance(shape, Line):
+            v_tex_s = map(lambda p: [p.x, p.y], shape.vertices)
+            update_item_coords = [j for sub in v_tex_s for j in sub]
+            update_item_config['fill'] = CanvasRenderer.color_str(shape.color)
+            update_item_config['width'] = shape.width
+
         if isinstance(shape, PrimitiveShape):
             update_item_config['fill'] = CanvasRenderer.color_str(shape.fill_color)
-            update_item_config['outline'] = CanvasRenderer.color_str(shape.line_color)
-            update_item_config['width'] = shape.line_width
+            update_item_config['outline'] = CanvasRenderer.color_str(shape.border_color)
+            update_item_config['width'] = shape.border_width
         
         if isinstance(shape, BoxCoords):
             update_item_coords = [
@@ -116,20 +126,20 @@ class CanvasRenderer(Renderer):
                 shape.position.x + shape.radius,
                 shape.position.y + shape.radius
             ]
-        
-        if isinstance(shape, Line) or isinstance(shape, Polygon):
-            v_tex_s = map(lambda p: [p.x, p.y], shape.vertices)
-            update_item_coords = [j for sub in v_tex_s for j in sub]
 
         if isinstance(shape, Arc):
-            update_item_config['start'] = shape.start
-            update_item_config['extent'] = shape.extent
+            update_item_config['start'] = clamp_int(shape.start, 0, 359)
+            update_item_config['extent'] = clamp_int(shape.extent, 0, 359)
             if shape.style == Arc.STYLE_ARC:
                 update_item_config['style'] = tk.ARC
             elif shape.style == Arc.STYLE_CHORD:
                 update_item_config['style'] = tk.CHORD
             else:
                 update_item_config['style'] = tk.PIESLICE
+        
+        if isinstance(shape, Polygon):
+            v_tex_s = map(lambda p: [p.x, p.y], shape.vertices)
+            update_item_coords = [j for sub in v_tex_s for j in sub]
 
         self.canvas.coords(canvas_item['id'], *update_item_coords)
         self.canvas.itemconfigure(canvas_item['id'], **update_item_config)

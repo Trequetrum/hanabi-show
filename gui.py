@@ -1,5 +1,5 @@
 from tkinter import ttk, Tk, Canvas, TOP, BOTTOM, LEFT, RIGHT, Y, X
-from typing import Callable, List, Optional, Tuple, Union
+from typing import List
 from animation import Animation
 from rendering import CanvasRenderer, RenderThunk
 

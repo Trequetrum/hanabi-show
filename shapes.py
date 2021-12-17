@@ -1,5 +1,6 @@
 import random as rand
-from typing import Any, Callable, List, Tuple, TypedDict
+from abc import ABC, abstractmethod
+from typing import List
 from dataclasses import dataclass, field
 
 from utility import clamp_int, gen_unique_number
@@ -12,6 +13,14 @@ class Color():
         self.red = clamp_int(red,0,255) 
         self.green = clamp_int(green,0,255)
         self.blue = clamp_int(blue,0,255)
+
+    @staticmethod
+    def random():
+        return Color(
+            rand.randint(0,255),
+            rand.randint(0,255),
+            rand.randint(0,255)
+        )
 
 
 class ColorNames():
@@ -37,21 +46,13 @@ class ColorNames():
     TEAL = lambda: Color(0,128,128)
     NAVY = lambda: Color(0,0,128)
 
-    @staticmethod
-    def random():
-        return Color(
-            rand.randint(0,255),
-            rand.randint(0,255),
-            rand.randint(0,255)
-        )
-
 @dataclass
 class Point():
     x: int
     y: int
 
 @dataclass
-class Shape():
+class Shape(ABC):
     id:int = field(default_factory=gen_unique_number)
 
 @dataclass
@@ -67,22 +68,24 @@ class Text(Shape):
     font_overstrike: bool = False
 
 @dataclass
-class PrimitiveShape(Shape):
+class Line(Shape):
+    """A line can consist of any number of segments connected end 
+    end. Specified by a series of vertices (Point(x, y))
+    """
+    vertices: List[Point] = field(default_factory=lambda:[])
+    color: Color = field(default_factory=ColorNames.BLACK)
+    width: int = 3 # Pixels
+
+@dataclass
+class PrimitiveShape(Shape, ABC):
     fill_color: Color = field(default_factory=ColorNames.BLACK)
-    line_color: Color = field(default_factory=ColorNames.BLACK)
-    line_width: int = 1 # Pixels
+    border_color: Color = field(default_factory=ColorNames.BLACK)
+    border_width: int = 1 # Pixels
 
 @dataclass
 class Circle(PrimitiveShape):
     radius: int = 5
     position: Point = field(default_factory=lambda:Point(0,0))
-
-@dataclass
-class Line(PrimitiveShape):
-    """A line can consist of any number of segments connected end 
-    end. Specified by a series of vertices (Point(x, y))
-    """
-    vertices: List[Point] = field(default_factory=lambda:[])
 
 @dataclass
 class Polygon(PrimitiveShape):
@@ -95,7 +98,7 @@ class Polygon(PrimitiveShape):
     vertices: List[Point] = field(default_factory=lambda:[])
 
 @dataclass
-class BoxCoords():
+class BoxCoords(ABC):
     upper_left: Point = field(default_factory=lambda:Point(0,0))
     lower_right: Point = field(default_factory=lambda:Point(0,0))
 
@@ -119,10 +122,11 @@ class Arc(PrimitiveShape, BoxCoords):
     extent: int = 360 # Degrees
     style: int = STYLE_PIESLICE
 
-class Picture():
+class Picture(ABC):
     """A picture generates a list of shapes"""
+    @abstractmethod
     def get_shapes(self) -> List[Shape]:
-        raise NotImplementedError
+        pass
 
 class PurePicture(Picture):
     """A single shape can be a picture and its properties already

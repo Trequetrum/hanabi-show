@@ -1,9 +1,10 @@
+from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Tuple
 from shapes import ColorNames, Point, Shape, Circle, Color
 from utility import ratiod
 
 
-class Animation():
+class Animation(ABC):
     """Describes an animation
     
     To make an animation subclass this class and be sure to include
@@ -21,6 +22,7 @@ class Animation():
         self.duration = duration
         self.name = name
 
+    @abstractmethod
     def get_state(self, time:int) -> List[Shape]:
         raise NotImplementedError
 
@@ -72,8 +74,8 @@ class CirleMove(Animation):
         self._init_circle = Circle(
             position=Point(0, 0),
             fill_color=color,
-            line_color=ColorNames.YELLOW(),
-            line_width=2, 
+            border_color=ColorNames.YELLOW(),
+            border_width=2, 
             radius=radius
         )
 

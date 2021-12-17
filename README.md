@@ -4,7 +4,7 @@
 
 Hanabi Show is a platform for learning how to program by working with basic shapes/animations and hopefully learning to build up complex pictures and animations. To really shine, this would require a lot more polish and documentation. I'm sure some of this could be simplified too.
 
-Currently, there's only one `Renderer` (**Tk**) implemented. TK may not be the best choice as Tk is designed with UI and not with animations in mind. You can't pre-render or update in chunks.
+Currently, there's only one `Renderer` (*Tk*) implemented. TK may not be the best choice as Tk is designed with UI and not with animations in mind. You can't pre-render or update in chunks.
 
 The two classes worth noting are `Animation` and `Picture`. If you subclass `Animation`, the renderer can render it for you. If you subclass `Picture`, then `AnimationBuilder` should be able to animate any attributes of the new class (and because `AnimationBuilder` is an `Animation`), the rest comes for free again.
 
