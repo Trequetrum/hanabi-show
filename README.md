@@ -4,9 +4,13 @@
 
 Hanabi Show is a platform for learning how to program by working with basic shapes/animations and hopefully learning to build up complex pictures and animations. To really shine, this would require a lot more polish and documentation. I'm sure some of this could be simplified too.
 
-Currently, there's only one `Renderer` (*Tk*) implemented. TK may not be the best choice as Tk is designed with UI and not with animations in mind. You can't pre-render or update in chunks.
+A beginner-level programming task might be to animate a sun that shoots out little rays, a robot waving to the user, or a firework show (the namesake of this repository). An intermediate animation might involve something that changes directions when it detects a colision (something like a bouncy-ball or rhoomba).
+
+Currently, there's only one `Renderer` (*Tk*) implemented. TK may not be the best choice as it is designed with UI and not with animation in mind. You can't pre-render or update in chunks/batches. I used Tk because I figured I'd start with libraries that python advertises as standard (tkinter used to ship with python). Implementing a renderer (it's just a class) with Pyglet might be a good learning project (somewhere between beginner and intermediate difficulty, if I had to hazard a guess). Writing a renderer using Pyglet's Shapes and Graphics will considerably outperform tkinter.
 
 The two classes worth noting are `Animation` and `Picture`. If you subclass `Animation`, the renderer can render it for you. If you subclass `Picture`, then `AnimationBuilder` should be able to animate any attributes of the new class (and because `AnimationBuilder` is an `Animation`), the rest comes for free again.
+
+See `main.py` and examples.py for some examples! 
 
 ### Some Technical Details
 

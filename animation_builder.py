@@ -27,8 +27,8 @@ class AnimationBuilder(Animation):
     def get_state(self, time:int) -> List[Shape]:
         if(time > 0 and time < self.duration):
 
-            for setter in self._animators:
-                setter(time)
+            for anamate in self._animators:
+                anamate(time)
             return self._subject.get_shapes()
         
         return []
@@ -37,12 +37,6 @@ T = TypeVar('T')
 def animate_property(
     prop: str,
     start_time: int,
-    # The ideal type here would be something like
-    # Callable[T, T, int, ...], T|None]
-    # but python type hints don't allow that as of yet. The current
-    # work-around is to type out an overload for each additional arg
-    # or kwarg and I can't be bothered to do that for a little bit of 
-    # extra type safety.
     setter: Callable[..., T|None],
     **kwargs: Any
 ):
@@ -61,7 +55,7 @@ def animate_property(
 
 # Setters always have the form 
 #
-#   fn(property: T, initial:T, time:int, * , ...kwargs: Any) -> T | None
+#   def fn(property: T, initial:T, time:int, * , ...kwargs: Any) -> T | None
 #
 # Where '...kwargs' means zero or more keyword arguements (as apposed
 # to a function that must accept all keyword args '**kwargs'). 
